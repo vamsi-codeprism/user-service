@@ -90,23 +90,40 @@ public class UserServiceImpl implements UserService {
     @Override
     public String signIn(String username, String password) {
         try {
+            System.out.println("Attempting sign in for username: " + username);
             User user = userRepository.findByUsername(username);
+            System.out.println("Found user: " + (user != null ? "yes" : "no"));
 
             Boolean isEmailVerified = emailVerifiedMap.get(username);
+            System.out.println("Email verification status from map: " + isEmailVerified);
+            System.out.println("Email verification map contents: " + emailVerifiedMap);
+            
             if ((isEmailVerified == null || !isEmailVerified) && (user == null || !user.isEmailVerified())) {
                 throw new RuntimeException("Email is not verified. Please verify your email first.");
             }
 
             if (user != null) {
+                System.out.println("Checking password for existing user");
                 if (!BCrypt.checkpw(password, user.getPassword())) {
                     throw new RuntimeException("Invalid credentials.");
                 }
-                UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(username);
-                return FirebaseAuth.getInstance().createCustomToken(userRecord.getUid());
+                try {
+                    System.out.println("Getting Firebase user record");
+                    UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(username);
+                    System.out.println("Creating Firebase custom token");
+                    return FirebaseAuth.getInstance().createCustomToken(userRecord.getUid());
+                } catch (FirebaseAuthException e) {
+                    System.err.println("Firebase authentication error: " + e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException("Authentication failed: " + e.getMessage());
+                }
             }
 
+            System.out.println("Creating new user as user was not found");
             return createNewUser(username, password);
         } catch (Exception e) {
+            System.err.println("Sign in error: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("An error occurred during sign-in: " + e.getMessage(), e);
         }
     }

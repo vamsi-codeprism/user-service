@@ -15,16 +15,19 @@ public class FirebaseConfig {
     @PostConstruct
     public void initialize() {
         try {
-            FileInputStream serviceAccount = new FileInputStream("src/main/resources/firebase-service-account.json");
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
+            FileInputStream serviceAccount = new FileInputStream("src/main/resources/serviceAccountKey.json");
+            FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
+
+            System.out.println("Firebase initialization successful");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Firebase initialization error: " + e.getMessage());
+            throw new RuntimeException("Firebase initialization failed", e);
         }
     }
 }
