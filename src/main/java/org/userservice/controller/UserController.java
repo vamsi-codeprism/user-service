@@ -22,7 +22,7 @@ public class UserController {
             }
             User savedUser = userService.signUp(user);
             if (savedUser != null) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+                return ResponseEntity.status(HttpStatus.CREATED).body("OTP sent to " + savedUser.getUsername());
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
             }

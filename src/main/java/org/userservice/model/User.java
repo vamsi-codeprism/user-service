@@ -2,16 +2,17 @@ package org.userservice.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
-@Setter
-@Getter
-@ToString
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +33,7 @@ public class User {
     )
     private String password;
 
-    @Size(min = 6, max = 6, message = "Verification code must be exactly 6 characters")
-    @Pattern(regexp = "^[0-9]{6}$", message = "Verification code must be a 6-digit number")
+    @Transient
     private String verificationCode;
 
-    private LocalDateTime codeExpiryTime;
-
-    @Column(nullable = false)
-    private boolean emailVerified = false;
 }

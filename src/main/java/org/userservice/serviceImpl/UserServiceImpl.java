@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
             System.out.println("Expiry time set for " + user.getUsername() + ": " + otpExpiryMap.get(user.getUsername()));
             emailService.sendVerificationCode(user.getUsername(), otp);
 
-            user.setEmailVerified(false);
             return user;
         } catch (Exception e) {
             throw new RuntimeException("An error occurred during signup: " + e.getMessage(), e);
@@ -98,7 +97,7 @@ public class UserServiceImpl implements UserService {
             System.out.println("Email verification status from map: " + isEmailVerified);
             System.out.println("Email verification map contents: " + emailVerifiedMap);
             
-            if ((isEmailVerified == null || !isEmailVerified) && (user == null || !user.isEmailVerified())) {
+            if ((isEmailVerified == null || !isEmailVerified) && (user == null)) {
                 throw new RuntimeException("Email is not verified. Please verify your email first.");
             }
 
@@ -130,17 +129,15 @@ public class UserServiceImpl implements UserService {
 
     private String createNewUser(String username, String password) throws FirebaseAuthException {
 
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-        newUser.setEmailVerified(true);
-
+        User newUser = User.builder()
+                .username(username)
+                .password(BCrypt.hashpw(password, BCrypt.gensalt()))
+                .build();
         try {
             UserRecord newUserRecord = FirebaseAuth.getInstance().createUser(
                 new UserRecord.CreateRequest()
                     .setEmail(username)
                     .setPassword(password)
-                    .setEmailVerified(true)
             );
             
             userRepository.save(newUser);
